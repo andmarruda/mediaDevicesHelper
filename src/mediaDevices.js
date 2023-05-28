@@ -106,4 +106,13 @@ class mediaDevices
     {
         return new recorder(this._mediaDevices);
     }
+
+    /**
+     * Verify mediaDevice status
+     * @return boolean
+     */
+    status()
+    {
+        return typeof this._mediaDevices !== 'undefined';
+    }
 }

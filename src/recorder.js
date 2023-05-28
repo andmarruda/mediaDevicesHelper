@@ -16,7 +16,7 @@ class recorder
             mp4: 'video/mp4',
             mpeg: 'video/mpeg',
             ogv: 'video/ogg',
-            webm: 'video/webm',
+            webm: 'video/webm'
         };
 
         this._allowedAudioTypes = {
@@ -24,22 +24,30 @@ class recorder
             mp3: 'audio/mpeg',
             wav: 'audio/wav',
             oga: 'audio/ogg',
-            weba: 'audio/webm',
+            weba: 'audio/webm'
         };
 
         this._mediaDevice = mediaDevice;
-        this._recorder = new MediaRecorder(this.mediaDevice);
+        this._recorder = new MediaRecorder(this._mediaDevice);
         this._data = [];
         this._time = 0;
         this._recording = false;
         this._error;
         this._limit = -1;
+        this._dataAvailable = false;
 
         var obj = this;
-        this._recorder.ondataavailable = (event) => obj._data.push(event.data);
+        this._recorder.addEventListener('dataavailable', (event) => {
+            obj._data.push(event.data);
+        });
         this._recorder.onstart = () => obj._countTime();
         this._recorder.onresume = () => obj._countTime();
-        this._recorder.onstop = () => obj._stopCountTime();
+        this._recorder.onstop = () => {
+            obj._stopCountTime();
+            obj._dataAvailable = true;
+            console.log(obj._data);
+            console.log(obj._dataAvailable);
+        }
         this._recorder.onerror = (event) => {
             obj.stop();
             obj._error = event.name;
@@ -85,6 +93,7 @@ class recorder
     start()
     {
         this._time = 0;
+        this._dataAvailable = false;
         this._recorder.start();
         var obj = this;
 
@@ -142,16 +151,26 @@ class recorder
 
     /**
      * Get blob of recording
-     * @param {string} mimeType
+     * @param {string} extension
      * @return Blob
      */
     getBlob(extension)
     {
-        if(this.getStatus())
+        if(this.status())
             this.stop();
 
         var obj = this;
-        return new Blob(this._data, {type: obj._allowedAudioTypes[extension] || obj._allowedVideoTypes[extension]});
+        return new Promise((resolve) => {
+            const check = () => {
+                if(obj._dataAvailable){
+                    resolve(new Blob(obj._data, {type: obj._allowedAudioTypes[extension] || obj._allowedVideoTypes[extension]}));
+                }else{
+                    setTimeout(check, 100);
+                }
+            };
+
+            check();
+        });
     }
 
     /**
@@ -159,11 +178,10 @@ class recorder
      * @param {string} extension
      * @return File
      */
-    getAudio(extension)
+    async getAudio(extension)
     {
-        const blob = this.getBlob(mimeType);
-        var obj = this;
-        return new File([blob], `audio.${extension}`, {type: obj._allowedAudioTypes[extension], lastModified: Date.now()});
+        const blob = await this.getBlob(mimeType);
+        return new File([blob], `audio.${extension}`, {type: this._allowedAudioTypes[extension], lastModified: Date.now()});
     }
 
     /**
@@ -171,10 +189,9 @@ class recorder
      * @param {string} extension
      * @return File
      */
-    getVideo(extension)
+    async getVideo(extension)
     {
-        const blob = this.getBlob(extension);
-        var obj = this;
-        return new File([blob], `video.${extension}`, {type: obj._allowedVideoTypes[extension], lastModified: Date.now()});
+        const blob = await this.getBlob(extension);
+        return new File([blob], `video.${extension}`, {type: this._allowedVideoTypes[extension], lastModified: Date.now()});
     }
 }
