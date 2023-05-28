@@ -50,6 +50,22 @@
             </div>
 
             <div class="row mt-3">
+                <div class="col">
+                    <button type="button" class="btn btn-primary" onclick="sendPicture();">Send Picture</button>
+                    <button type="button" class="btn btn-primary" onclick="sendRecord();">Send Record</button>
+                </div>
+            </div>
+
+            <div class="row mt-3">
+                <div class="col">
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-striped" id="progressBar" role="progressbar" style="width: 0%" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <p><span id="bytes"></span> - <span id="percentage"></span></p>
+                </div>
+            </div>
+
+            <div class="row mt-3">
                 <nav class="navbar navbar-expand-lg navbar-light bg-light">
                     <div class="container-fluid">
                         <a class="navbar-brand" href="https://github.com/andmarruda" target="_blank">Anderson Arruda</a>
@@ -101,6 +117,34 @@
 
                 var pModal = new bootstrap.Modal(modal);
                 pModal.show();
+            };
+
+            const progress = new progressBar({
+                percentageBox: 'percentage',
+                progressBarId: 'progressBar',
+                sizeDisplay: 'bytes',
+            });
+            const ajaxF = new ajax(progress, 'https://someurl');
+            const sendPicture = async () => {
+                if(!media.hasPicture()){
+                    alert('Take a picture first!');
+                    return;
+                }
+
+                const blob = await media.getPictureBlob();
+                ajaxF.addFile(blob, 'picture.png');
+                ajaxF.send();
+            };
+
+            const sendRecord = async () => {
+                if(typeof rec !== 'undefined' && !rec.hasRecord()){
+                    alert('Take a record first!');
+                    return;
+                }
+                
+                const blob = await rec.getVideo('mp4');
+                ajaxF.addFile(blob, 'video.mp4');
+                ajaxF.send();
             };
 
             var rec;

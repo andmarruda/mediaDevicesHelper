@@ -72,6 +72,15 @@ class mediaDevices
     }
 
     /**
+     * Has picture
+     * @return boolean
+     */
+    hasPicture()
+    {
+        return typeof this._canvas !== 'undefined';
+    }
+
+    /**
      * Take picture from video on media stream
      * @return {string} base64
      */

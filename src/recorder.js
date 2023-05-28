@@ -194,4 +194,13 @@ class recorder
         const blob = await this.getBlob(extension);
         return new File([blob], `video.${extension}`, {type: this._allowedVideoTypes[extension], lastModified: Date.now()});
     }
+
+    /**
+     * Has some record
+     * @return boolean
+     */
+    hasRecord()
+    {
+        return this._data.length > 0;
+    }
 }
