@@ -94,7 +94,7 @@ class mediaDevices
     async getPictureBlob(type='png', quality=1)
     {
         const blob = await new Promise(resolve => this._canvas.toBlob(resolve, this._allowedImageTypes[type], quality));
-        const file = new File([blob], 'picture.png', {type: this._allowedImageTypes[type], lastModified: Date.now()});
+        const file = new File([blob], `picture.${type}`, {type: this._allowedImageTypes[type], lastModified: Date.now()});
         return file;
     }
 

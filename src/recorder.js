@@ -13,13 +13,20 @@ class recorder
     constructor(mediaDevice)
     {
         this._allowedVideoTypes = {
-
+            mp4: 'video/mp4',
+            mpeg: 'video/mpeg',
+            ogv: 'video/ogg',
+            webm: 'video/webm',
         };
 
         this._allowedAudioTypes = {
-
+            aac: 'audio/aac',
+            mp3: 'audio/mpeg',
+            wav: 'audio/wav',
+            oga: 'audio/ogg',
+            weba: 'audio/webm',
         };
-        
+
         this._mediaDevice = mediaDevice;
         this._recorder = new MediaRecorder(this.mediaDevice);
         this._data = [];
@@ -131,5 +138,43 @@ class recorder
     getError()
     {
         return this._error;
+    }
+
+    /**
+     * Get blob of recording
+     * @param {string} mimeType
+     * @return Blob
+     */
+    getBlob(extension)
+    {
+        if(this.getStatus())
+            this.stop();
+
+        var obj = this;
+        return new Blob(this._data, {type: obj._allowedAudioTypes[extension] || obj._allowedVideoTypes[extension]});
+    }
+
+    /**
+     * Get only audio
+     * @param {string} extension
+     * @return File
+     */
+    getAudio(extension)
+    {
+        const blob = this.getBlob(mimeType);
+        var obj = this;
+        return new File([blob], `audio.${extension}`, {type: obj._allowedAudioTypes[extension], lastModified: Date.now()});
+    }
+
+    /**
+     * Get video
+     * @param {string} extension
+     * @return File
+     */
+    getVideo(extension)
+    {
+        const blob = this.getBlob(extension);
+        var obj = this;
+        return new File([blob], `video.${extension}`, {type: obj._allowedVideoTypes[extension], lastModified: Date.now()});
     }
 }

@@ -5,6 +5,14 @@
         <title>Media Devices Test</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+        <style>
+            .blink_me { animation: blinker 1s step-start infinite;}
+            @keyframes blinker {
+                50% {
+                    opacity: 0.3;
+                }
+            }
+        </style>
     </head>
     <body>
         <div class="container-fluid">
@@ -21,7 +29,7 @@
                                     <a class="nav-link" onclick="picture();" href="#">Picture</a>
                                 </li>
                                 <li>
-                                    <a class="nav-link" href="#">Video and Audio Recorder</a>
+                                    <a class="nav-link" onclick="record(event);" href="#">Video and Audio Recorder</a>
                                 </li>
                             </ul>
                         </div>
@@ -62,7 +70,22 @@
                     </div>
               </div>
             </div>
-        </div>          
+        </div>
+        
+        <div class="modal" tabindex="-1" id="videomodal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Picture example</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <video id="videoRecorded" controls></video>
+                        <p id="timeRecorded"></p>
+                    </div>
+              </div>
+            </div>
+        </div>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
         <script type="text/javascript" src="../dist/mediaDevicesHelper.min.js"></script>
@@ -72,6 +95,8 @@
                 audioElementId: 'audio',
             });
 
+            const recorder = media.getRecorder();
+
             const picture = () => {
                 const modal = document.getElementById('pictureModal');
                 modal.querySelector('.modal-body img').src = media.getPicture();
@@ -80,8 +105,21 @@
                 pModal.show();
             };
 
-            const record = () => {
-                const recorder = media.getRecorder();
+            const record = ({target}) => {
+                if(recorder.getStatus()){
+                    const modal = document.getElementById('videomodal');
+                    modal.querySelector('.modal-body video').src = window.URL.createObjectURL(recorder.getBlob('mp4'));
+                    modal.querySelector('.modal-body #timeRecorded').innerHTML = recorder.getTime()+' seconds';
+
+                    recorder.stop();
+                    target.classList.remove('blink_me');
+                    alert(recorder.getTime());
+
+                    return;
+                }
+
+                target.classList.add('blink_me');
+                recorder.start();
             };
         </script>
     </body>
