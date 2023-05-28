@@ -20,12 +20,6 @@
                                 <li class="nav-item">
                                     <a class="nav-link" onclick="picture();" href="#">Picture</a>
                                 </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="#">Audio Recorder</a>
-                                </li>
-                                <li>
-                                    <a class="nav-link" href="#">Video Recorder</a>
-                                </li>
                                 <li>
                                     <a class="nav-link" href="#">Video and Audio Recorder</a>
                                 </li>
@@ -84,6 +78,10 @@
 
                 var pModal = new bootstrap.Modal(modal);
                 pModal.show();
+            };
+
+            const record = () => {
+                const recorder = media.getRecorder();
             };
         </script>
     </body>

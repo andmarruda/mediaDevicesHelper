@@ -25,7 +25,7 @@ class mediaDevices
      */
     constructor(audio, video, config)
     {
-        this.allowedImageTypes = {
+        this._allowedImageTypes = {
             jpg: 'image/jpeg',
             gif: 'image/gif',
             png: 'image/png',
@@ -33,21 +33,20 @@ class mediaDevices
             webp: 'image/webp'
         };
 
-        this.audio = Boolean(audio);
-        this.video = Boolean(video);
-        this.videoElement = document.getElementById(config.videoElementId);
-        this.audioElement = document.getElementById(config.audioElementId);
-        this.config = {};
-        if(this.config.videoWidth !== undefined){
-            this.config['video'] = {
-                width: {...this.config.videoWidth}
+        this._audio = Boolean(audio);
+        this._video = Boolean(video);
+        this._videoElement = document.getElementById(config.videoElementId);
+        this._audioElement = document.getElementById(config.audioElementId);
+        this._config = {};
+        if(this._config.videoWidth !== undefined){
+            this._config['video'] = {
+                width: {...this._config.videoWidth}
             };
         }
 
-        if(this.config.videoHeight !== undefined){
-            this.config['video'] = {
-                ...this.config.video,
-                height: {...this.config.videoHeight}
+        if(this._config.videoHeight !== undefined){
+            this._config['video'] = {
+                height: {...this._config.videoHeight}
             };
         }
 
@@ -60,15 +59,15 @@ class mediaDevices
      */
     async start()
     {
-        this.mediaDevices = await navigator.mediaDevices.getUserMedia({audio: this.audio, video: this.config.video || this.video});
-        if(this.video && this.videoElement !== null){
-            this.videoElement.srcObject = this.mediaDevices;
-            this.videoElement.play();
+        this._mediaDevices = await navigator.mediaDevices.getUserMedia({audio: this._audio, video: this._config.video || this._video});
+        if(this._video && this._videoElement !== null){
+            this._videoElement.srcObject = this._mediaDevices;
+            this._videoElement.play();
         }
 
-        if(this.audio && this.audioElement !== null){
-            this.audioElement.srcObject = this.mediaDevices;
-            this.audioElement.play();
+        if(this._audio && this._audioElement !== null){
+            this._audioElement.srcObject = this._mediaDevices;
+            this._audioElement.play();
         }
     }
 
@@ -78,12 +77,12 @@ class mediaDevices
      */
     getPicture(type='png')
     {
-        this.canvas = document.createElement('canvas');
-        let context = this.canvas.getContext('2d');
-        this.canvas.width = this.videoElement.videoWidth;
-        this.canvas.height = this.videoElement.videoHeight;
-        context.drawImage(this.videoElement, 0, 0, this.canvas.width, this.canvas.height);
-        return this.canvas.toDataURL(this.allowedImageTypes[type]);
+        this._canvas = document.createElement('canvas');
+        let context = this._canvas.getContext('2d');
+        this._canvas.width = this._videoElement.videoWidth;
+        this._canvas.height = this._videoElement.videoHeight;
+        context.drawImage(this._videoElement, 0, 0, this._canvas.width, this._canvas.height);
+        return this._canvas.toDataURL(this._allowedImageTypes[type]);
     }
 
     /**
@@ -94,8 +93,17 @@ class mediaDevices
      */
     async getPictureBlob(type='png', quality=1)
     {
-        const blob = await new Promise(resolve => this.canvas.toBlob(resolve, this.allowedImageTypes[type], quality));
-        const file = new File([blob], 'picture.png', {type: this.allowedImageTypes[type], lastModified: Date.now()});
+        const blob = await new Promise(resolve => this._canvas.toBlob(resolve, this._allowedImageTypes[type], quality));
+        const file = new File([blob], 'picture.png', {type: this._allowedImageTypes[type], lastModified: Date.now()});
         return file;
+    }
+
+    /**
+     * Returns the video recorder
+     * @return instanceof videoRecorder
+     */
+    getRecorder()
+    {
+        return new recorder(this._mediaDevices);
     }
 }
